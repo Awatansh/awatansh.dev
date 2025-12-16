@@ -1,0 +1,38 @@
+node_modules
+.env
+.env.local
+*.log
+.DS_Store
+.vscode
+.idea
+coverage
+dist
+.turbo
+.next
+out
+build
+
+# Development documentation
+devdocs/
+
+# Development files
+dev.js
+setup.bat
+setup.sh
+start-dev.bat
+start.bat
+
+# Backend uploads (not used in production)
+backend/uploads/
+
+# Test files
+*.test.js
+*.test.ts
+**/__tests__/
+
+# OS files
+Thumbs.db
+
+# Temporary files
+*.tmp
+nul

@@ -1,0 +1,55 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+coverage/
+.next/
+out/
+.turbo/
+db/
+*.db
+*.sqlite
+
+# Development documentation
+devdocs/
+
+# Development files
+dev.js
+setup.bat
+setup.sh
+start-dev.bat
+start.bat
+
+# Backend uploads (not used in production)
+backend/uploads/
+
+# Build artifacts
+backend/dist/
+frontend/dist/
+
+# Test files
+*.test.js
+*.test.ts
+**/__tests__/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+Thumbs.db
+
+# Temporary files
+*.tmp
+nul
