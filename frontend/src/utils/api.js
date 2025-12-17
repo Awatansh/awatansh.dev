@@ -5,7 +5,8 @@ export const apiClient = axios.create({
     baseURL: API_URL,
     headers: {
         "Content-Type": "application/json"
-    }
+    },
+    timeout: 30000 // 30 second timeout
 });
 // Interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
@@ -14,6 +15,29 @@ apiClient.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
+});
+// Retry logic for backend cold starts
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+// Apply retry interceptor to response errors
+apiClient.interceptors.response.use((response) => response, async (error) => {
+    const config = error.config;
+    // Don't retry if already retried (prevent infinite loops)
+    if (config.__retried) {
+        return Promise.reject(error);
+    }
+    const isRetryable = error.code === "ECONNREFUSED" ||
+        error.code === "ECONNRESET" ||
+        error.code === "ETIMEDOUT" ||
+        error.code === "ENOTFOUND" ||
+        (error.response?.status >= 500 && error.response?.status < 600);
+    if (isRetryable) {
+        config.__retried = true;
+        console.warn(`Backend connection failed, retrying... (${MAX_RETRIES}/${MAX_RETRIES})`);
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+        return apiClient(config);
+    }
+    return Promise.reject(error);
 });
 // Context API
 export async function getContext() {

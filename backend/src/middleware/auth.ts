@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import crypto from "crypto";
 
 export interface AuthRequest extends Request {
   isAuthenticated?: boolean;
@@ -8,9 +9,70 @@ export interface AuthRequest extends Request {
   };
 }
 
-// Simple session-based authentication
-// In production, replace with proper JWT or OAuth
-const sessions = new Map<string, { email: string; name?: string; expiresAt: number }>();
+// JWT-based authentication (stateless - works with serverless)
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const TOKEN_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
+
+interface TokenPayload {
+  email: string;
+  name?: string;
+  iat: number;
+  exp: number;
+}
+
+// Simple JWT implementation (no external deps)
+function base64UrlEncode(str: string): string {
+  return Buffer.from(str)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+}
+
+function createJWT(payload: TokenPayload): string {
+  const header = base64UrlEncode(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+  const body = base64UrlEncode(JSON.stringify(payload));
+  const signature = base64UrlEncode(
+    crypto
+      .createHmac("sha256", JWT_SECRET)
+      .update(`${header}.${body}`)
+      .digest()
+      .toString()
+  );
+  return `${header}.${body}.${signature}`;
+}
+
+function verifyJWT(token: string): TokenPayload | null {
+  try {
+    const [header, body, signature] = token.split(".");
+    
+    // Verify signature
+    const expectedSignature = base64UrlEncode(
+      crypto
+        .createHmac("sha256", JWT_SECRET)
+        .update(`${header}.${body}`)
+        .digest()
+        .toString()
+    );
+    
+    if (signature !== expectedSignature) {
+      return null;
+    }
+    
+    // Parse and validate payload
+    const payload = JSON.parse(Buffer.from(body, "base64").toString()) as TokenPayload;
+    
+    if (payload.exp < Date.now()) {
+      return null; // Token expired
+    }
+    
+    return payload;
+  } catch (error) {
+    return null;
+  }
+}
+
+export { verifyJWT };
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
   const authToken = req.headers.authorization?.replace("Bearer ", "");
@@ -19,29 +81,29 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
-  const session = sessions.get(authToken);
+  const payload = verifyJWT(authToken);
   
-  if (!session || session.expiresAt < Date.now()) {
-    sessions.delete(authToken);
+  if (!payload) {
     return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
   }
 
   req.isAuthenticated = true;
-  req.user = { email: session.email, name: session.name };
+  req.user = { email: payload.email, name: payload.name };
   next();
 }
 
 export function createSession(email: string, name?: string): string {
-  const token = generateToken();
-  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-  sessions.set(token, { email, name, expiresAt });
-  return token;
+  const payload: TokenPayload = {
+    email,
+    name,
+    iat: Date.now(),
+    exp: Date.now() + TOKEN_EXPIRY
+  };
+  
+  return createJWT(payload);
 }
 
 export function removeSession(token: string): void {
-  sessions.delete(token);
-}
-
-function generateToken(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+  // JWT tokens are stateless - nothing to remove
+  // Token becomes invalid when it expires
 }
