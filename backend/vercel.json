@@ -4,5 +4,12 @@
   "installCommand": "npm install --include=dev",
   "env": {
     "NODE_ENV": "production"
+  },
+  "functions": {
+    "api/index.ts": {
+      "runtime": "nodejs20.x",
+      "memory": 1024,
+      "maxDuration": 60
+    }
   }
 }
