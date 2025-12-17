@@ -4,20 +4,8 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "outputDirectory": "dist",
-  "git": {
-    "deploymentEnabled": {
-      "main": true
-    }
-  },
   "env": {
     "VITE_API_URL": "@vite_api_url"
-  },
-  "buildCache": {
-    "filesMatch": [
-      "package-lock.json",
-      "tsconfig.json",
-      "src/**"
-    ]
   },
   "rewrites": [
     {
