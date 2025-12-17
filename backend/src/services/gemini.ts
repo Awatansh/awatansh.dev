@@ -26,13 +26,11 @@ export async function chat(request: ChatRequest): Promise<ChatResponse> {
     }
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
+      model: "gemma-3-4b",
       generationConfig: {
         maxOutputTokens: 1000,
       }
     });
-
-    // Build context-aware system prompt
     const contextPrompt = buildContextPrompt(request.context);
     const conversationHistory = request.messages
       .map((msg: any) => `${msg.role}: ${msg.content}`)
@@ -68,7 +66,7 @@ export async function askQuestion(
     }
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash",
+      model: "gemma-3-4b",
       generationConfig: {
         maxOutputTokens: 1000,
       }
