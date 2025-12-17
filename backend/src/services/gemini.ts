@@ -26,7 +26,7 @@ export async function chat(request: ChatRequest): Promise<ChatResponse> {
     }
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash-native-audio-dialog",
+      model: "gemini-1.5-pro",
       generationConfig: {
         maxOutputTokens: 1000,
       }
@@ -66,7 +66,7 @@ export async function askQuestion(
     }
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-flash-native-audio-dialog",
+      model: "gemini-1.5-pro",
       generationConfig: {
         maxOutputTokens: 1000,
       }
