@@ -41,21 +41,28 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Routes - remove /api prefix since Vercel handles the path
-app.use('/contact', contactRoutes);
-app.use('/context', contextRoutes);
-app.use('/chat', chatRoutes);
-app.use('/auth', authRoutes);
+// Routes - Vercel adds /api prefix, so we need it here
+app.use('/api/contact', contactRoutes);
+app.use('/api/context', contextRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
+  console.log('Health check requested');
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Catch-all for debugging
+app.all('*', (req, res) => {
+  console.log(`Unmatched route: ${req.method} ${req.path}`);
+  res.status(404).json({ error: `Route not found: ${req.method} ${req.path}` });
 });
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal Server Error' });
+  console.error('Express error:', err);
+  res.status(500).json({ error: 'Internal Server Error', message: err.message });
 });
 
 export default app;
