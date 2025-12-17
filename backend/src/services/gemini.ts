@@ -77,14 +77,38 @@ export async function askQuestion(
     const fullPrompt = `${contextPrompt}\n\nUser: ${question}\nAssistant:`;
 
     console.log("Calling Gemini API with question:", question.substring(0, 50) + "...");
-    const result = await model.generateContent(fullPrompt);
-    console.log("Gemini API response received");
-    return result.response.text();
+    
+    // Retry logic for service unavailable errors
+    let lastError: any;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const result = await model.generateContent(fullPrompt);
+        console.log("Gemini API response received");
+        return result.response.text();
+      } catch (error: any) {
+        lastError = error;
+        // Retry on 503 Service Unavailable
+        if (error?.status === 503 && attempt < 3) {
+          console.warn(`Gemini API overloaded (503), retry attempt ${attempt}/3`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Wait 1s, 2s, 3s
+          continue;
+        }
+        throw error;
+      }
+    }
+    throw lastError;
   } catch (error) {
-    console.error("Gemini API error:", error instanceof Error ? error.message : String(error));
-    if (error instanceof Error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("Gemini API error:", errorMsg);
+    if (error instanceof Error && error.stack) {
       console.error("Stack:", error.stack);
     }
+    
+    // Show helpful message for service unavailable
+    if (errorMsg.includes("503") || errorMsg.includes("overloaded")) {
+      return "The AI service is temporarily busy. Please try again in a moment!";
+    }
+    
     return "Sorry, I encountered an error processing your question. Please try other commands like 'help', 'about', or 'projects'.";
   }
 }
