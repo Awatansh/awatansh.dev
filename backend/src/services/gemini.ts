@@ -63,6 +63,7 @@ export async function askQuestion(
   try {
     // If no API key, return helpful fallback
     if (!genAI || !GEMINI_API_KEY) {
+      console.warn("Gemini API key not configured. GEMINI_API_KEY:", GEMINI_API_KEY ? "set but invalid" : "not set");
       return "AI features are currently unavailable. Please configure GEMINI_API_KEY in your .env file. Try using 'about', 'projects', 'skills', or 'experience' commands instead!";
     }
 
@@ -75,10 +76,15 @@ export async function askQuestion(
     const contextPrompt = buildContextPrompt(context);
     const fullPrompt = `${contextPrompt}\n\nUser: ${question}\nAssistant:`;
 
+    console.log("Calling Gemini API with question:", question.substring(0, 50) + "...");
     const result = await model.generateContent(fullPrompt);
+    console.log("Gemini API response received");
     return result.response.text();
   } catch (error) {
-    console.error("Gemini API error:", error);
+    console.error("Gemini API error:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error) {
+      console.error("Stack:", error.stack);
+    }
     return "Sorry, I encountered an error processing your question. Please try other commands like 'help', 'about', or 'projects'.";
   }
 }
