@@ -19,6 +19,14 @@ export default defineConfig({
       '@portfolio/shared': path.resolve(__dirname, '../shared/src'),
     },
   },
+  server: {
+    middlewareMode: true,
+    // SPA fallback: for any 404, serve index.html
+    // This is handled by Vercel's vercel.json
+  },
+  preview: {
+    middlewareMode: true,
+  },
   test: {
     environment: 'jsdom',
     globals: true,
