@@ -1,11 +1,19 @@
 import axios from "axios";
 import type { PortfolioContext, ContactSubmission } from "@portfolio/shared";
 
-const API_URL = (import.meta.env.VITE_API_URL as string) || "http://localhost:5000/api";
+// Ensure baseURL always ends with /api
+let baseURL = (import.meta.env.VITE_API_URL as string) || "http://localhost:5000/api";
+// Remove trailing slash then ensure /api is at the end
+baseURL = baseURL.replace(/\/$/, "");
+if (!baseURL.endsWith("/api")) {
+  baseURL = baseURL + "/api";
+}
+
+console.log("API baseURL:", baseURL);
 
 // Add auth token to requests
 export const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: baseURL,
   headers: {
     "Content-Type": "application/json"
   },
