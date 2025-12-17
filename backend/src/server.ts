@@ -14,14 +14,18 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Normalize frontend URL (remove trailing slash)
+const frontendURL = (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, "");
+
 console.log("Environment check:");
 console.log("- PORT:", PORT);
+console.log("- FRONTEND_URL:", frontendURL);
 console.log("- GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "Set (starts with " + process.env.GEMINI_API_KEY.substring(0, 4) + "...)" : "Not Set");
 
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: frontendURL,
     credentials: true
   })
 );
