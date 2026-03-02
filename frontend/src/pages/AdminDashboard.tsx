@@ -22,6 +22,21 @@ interface ContactSubmission {
 
 type AdminSection = "inbox" | "about" | "projects" | "experience" | "education" | "skills" | "socials";
 
+const SOCIAL_PLATFORM_OPTIONS = [
+  "GitHub",
+  "LinkedIn",
+  "Twitter",
+  // "X",
+  "Instagram",
+  "Facebook",
+  "YouTube",
+  "Discord",
+  // "LeetCode",
+  "Medium",
+  // "Dev.to",
+  // "Other",
+];
+
 const AdminDashboard = () => {
   const [submissions, setSubmissions] = useState<ContactSubmission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,6 +188,7 @@ const AdminDashboard = () => {
     const newSocial: Social = {
       name: "New Platform",
       url: "",
+      icon: "",
     };
     setContext({ ...context, socials: [...context.socials, newSocial] });
   };
@@ -758,17 +774,38 @@ const AdminDashboard = () => {
             <div className="section-content">
               {context.socials.map((social, index) => (
                 <div key={index} className="edit-card">
+                  {(() => {
+                    const selectedPlatform = SOCIAL_PLATFORM_OPTIONS.includes(social.name)
+                      ? social.name
+                      : "Other";
+
+                    return (
+                      <>
                   <div className="card-header">
                     <h3>{social.name}</h3>
                     <button onClick={() => deleteSocial(index)} className="delete-small-btn">🗑️</button>
                   </div>
                   <div className="form-row">
                     <div className="form-group">
-                      <label>Platform Name</label>
-                      <input 
-                        value={social.name}
-                        onChange={(e) => updateSocial(index, "name", e.target.value)}
-                      />
+                      <label>Platform</label>
+                      <select
+                        value={selectedPlatform}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value === "Other") {
+                            if (SOCIAL_PLATFORM_OPTIONS.includes(social.name)) {
+                              updateSocial(index, "name", "");
+                            }
+                            return;
+                          }
+
+                          updateSocial(index, "name", value);
+                        }}
+                      >
+                        {SOCIAL_PLATFORM_OPTIONS.map((platform) => (
+                          <option key={platform} value={platform}>{platform}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="form-group">
                       <label>URL</label>
@@ -779,6 +816,27 @@ const AdminDashboard = () => {
                       />
                     </div>
                   </div>
+                  {selectedPlatform === "Other" && (
+                    <div className="form-group">
+                      <label>Custom Platform Name</label>
+                      <input
+                        value={social.name}
+                        onChange={(e) => updateSocial(index, "name", e.target.value)}
+                        placeholder="Enter platform name"
+                      />
+                    </div>
+                  )}
+                  <div className="form-group">
+                    <label>Icon (optional)</label>
+                    <input 
+                      value={social.icon || ""}
+                      onChange={(e) => updateSocial(index, "icon", e.target.value)}
+                      placeholder="/img/linkedin-logo.svg or https://..."
+                    />
+                  </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ))}
             </div>

@@ -19,7 +19,14 @@ body,
 }
 
 body {
-  background: radial-gradient(ellipse at top, #1a0a2e 0%, #0a0a0a 50%, #0f0f1e 100%);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(10, 10, 10, 0.82) 0%,
+      rgba(26, 10, 46, 0.76) 50%,
+      rgba(15, 15, 30, 0.82) 100%
+    ),
+    url("/banner.jpeg") center / cover no-repeat fixed;
   background-attachment: fixed;
   color: #00ff00;
   overflow: hidden;
@@ -251,7 +258,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+  background: rgba(10, 10, 10, 0.3);
   padding: 20px;
   width: 100%;
 }
@@ -338,7 +345,7 @@ body::before {
   grid-template-columns: 280px 1fr;
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+  background: rgba(10, 10, 10, 0.35);
   color: #00ff00;
   overflow-x: hidden;
 }
@@ -1340,7 +1347,7 @@ body::before {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0f0f1e 100%);
+  background: rgba(10, 10, 10, 0.35);
 }
 
 /* Sidebar Styles */
@@ -2596,6 +2603,7 @@ body::before {
 }
 
 .form-group input,
+.form-group select,
 .form-group textarea {
   width: 100%;
   background: rgba(0, 0, 0, 0.5);
@@ -2609,10 +2617,30 @@ body::before {
 }
 
 .form-group input:focus,
+.form-group select:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: #00ff00;
   box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.form-group select {
+  appearance: none;
+  cursor: pointer;
+  padding-right: 36px;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #00ff00 50%),
+    linear-gradient(135deg, #00ff00 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.form-group select option {
+  background: #0a0a0a;
+  color: #00ff00;
 }
 
 .form-group textarea {

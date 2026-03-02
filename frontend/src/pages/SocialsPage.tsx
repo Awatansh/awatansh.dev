@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getContext } from "../utils/api";
-import type { PortfolioContext } from "@portfolio/shared";
+import type { PortfolioContext, Social } from "@portfolio/shared";
 
 const SocialsPage = () => {
   const [context, setContext] = useState<PortfolioContext | null>(null);
@@ -24,14 +24,28 @@ const SocialsPage = () => {
     return <div className="page-container"><div className="loading">Loading...</div></div>;
   }
 
-  // Map social names to logo filenames
   const logoMap: Record<string, string> = {
-    'GitHub': 'github-logo.svg',
-    'LinkedIn': 'linkedin-logo.svg',
-    'Twitter': 'twitter-logo.svg',
-    'X': 'twitter-logo.svg',
-    'Instagram': 'instagram-logo.svg',
-    'Facebook': 'facebook-logo.svg',
+    github: "github-logo.svg",
+    linkedin: "linkedin-logo.svg",
+    twitter: "twitter-logo.svg",
+    x: "twitter-logo.svg",
+    instagram: "instagram-logo.svg",
+    facebook: "facebook-logo.svg",
+  };
+
+  const getSocialIconSrc = (social: Social): string => {
+    const configuredIcon = social.icon?.trim();
+
+    if (configuredIcon) {
+      if (configuredIcon.startsWith("http://") || configuredIcon.startsWith("https://") || configuredIcon.startsWith("/")) {
+        return configuredIcon;
+      }
+
+      return configuredIcon.includes("/") ? `/${configuredIcon}` : `/img/${configuredIcon}`;
+    }
+
+    const logoFile = logoMap[social.name.trim().toLowerCase()] || "default-logo.svg";
+    return `/img/${logoFile}`;
   };
 
   return (
@@ -49,8 +63,7 @@ const SocialsPage = () => {
 
         {context?.socials && context.socials.length > 0 ? (
           <div className="socials-grid">
-            {context.socials.map((social: any, index: number) => {
-              const logoFile = logoMap[social.name] || 'default-logo.svg';
+            {context.socials.map((social, index: number) => {
               return (
                 <a
                   key={index}
@@ -61,7 +74,7 @@ const SocialsPage = () => {
                 >
                   <div className="social-icon-wrapper">
                     <img 
-                      src={`/img/${logoFile}`} 
+                      src={getSocialIconSrc(social)}
                       alt={`${social.name} logo`}
                       className="social-icon-img"
                       onError={(e) => {
