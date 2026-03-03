@@ -15,7 +15,7 @@ export function useRippleBackground() {
             ripple.style.top = `${y}px`;
             containerRef.current.appendChild(ripple);
             // Remove after animation
-            setTimeout(() => ripple.remove(), 1800);
+            setTimeout(() => ripple.remove(), 2800);
         };
         document.addEventListener("click", handleClick);
         return () => {

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'node:path'
 
 export default defineConfig({
+  envPrefix: ['VITE_', 'YT_'],
   plugins: [
     {
       name: 'resolve-shared-plugin',

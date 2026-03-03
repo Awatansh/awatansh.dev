@@ -6,6 +6,7 @@ import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRedirect from "./components/AdminRedirect";
 import { useRippleBackground } from "./hooks/useRippleBackground";
+import BackgroundAudioPlayer from "./components/BackgroundAudioPlayer";
 
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const ProjectsPage = lazy(() => import("./pages/ProjectsPage"));
@@ -55,6 +56,7 @@ function App() {
       <Router>
         <div className="app-layout">
           <div className="ripple-background" ref={rippleRef}></div>
+          <BackgroundAudioPlayer />
           <Suspense fallback={<div className="loading">Loading page...</div>}>
             <Routes>
               {/* Admin routes (no sidebar) */}
