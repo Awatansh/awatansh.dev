@@ -22,18 +22,27 @@ const SocialsPage = () => {
     if (loading) {
         return _jsx("div", { className: "page-container", children: _jsx("div", { className: "loading", children: "Loading..." }) });
     }
-    // Map social names to logo filenames
     const logoMap = {
-        'GitHub': 'github-logo.svg',
-        'LinkedIn': 'linkedin-logo.svg',
-        'Twitter': 'twitter-logo.svg',
-        'X': 'twitter-logo.svg',
-        'Instagram': 'instagram-logo.svg',
-        'Facebook': 'facebook-logo.svg',
+        github: "github-logo.svg",
+        linkedin: "linkedin-logo.svg",
+        twitter: "twitter-logo.svg",
+        x: "twitter-logo.svg",
+        instagram: "instagram-logo.svg",
+        facebook: "facebook-logo.svg",
+    };
+    const getSocialIconSrc = (social) => {
+        const configuredIcon = social.icon?.trim();
+        if (configuredIcon) {
+            if (configuredIcon.startsWith("http://") || configuredIcon.startsWith("https://") || configuredIcon.startsWith("/")) {
+                return configuredIcon;
+            }
+            return configuredIcon.includes("/") ? `/${configuredIcon}` : `/img/${configuredIcon}`;
+        }
+        const logoFile = logoMap[social.name.trim().toLowerCase()] || "default-logo.svg";
+        return `/img/${logoFile}`;
     };
     return (_jsx("div", { className: "page-container", children: _jsxs("div", { className: "page-content", children: [_jsx("h1", { className: "page-title", children: "\uD83C\uDF10 Connect With Me" }), _jsx("div", { className: "page-divider" }), _jsx("div", { className: "content-section", children: _jsx("p", { className: "section-description", children: "Feel free to connect with me on various platforms. I'm always open to interesting conversations and collaboration opportunities!" }) }), context?.socials && context.socials.length > 0 ? (_jsx("div", { className: "socials-grid", children: context.socials.map((social, index) => {
-                        const logoFile = logoMap[social.name] || 'default-logo.svg';
-                        return (_jsxs("a", { href: social.url, target: "_blank", rel: "noopener noreferrer", className: "social-card", children: [_jsx("div", { className: "social-icon-wrapper", children: _jsx("img", { src: `/img/${logoFile}`, alt: `${social.name} logo`, className: "social-icon-img", onError: (e) => {
+                        return (_jsxs("a", { href: social.url, target: "_blank", rel: "noopener noreferrer", className: "social-card", children: [_jsx("div", { className: "social-icon-wrapper", children: _jsx("img", { src: getSocialIconSrc(social), alt: `${social.name} logo`, className: "social-icon-img", onError: (e) => {
                                             e.currentTarget.style.display = 'none';
                                             const wrapper = e.currentTarget.parentElement;
                                             if (wrapper) {

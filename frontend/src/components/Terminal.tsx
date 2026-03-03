@@ -21,7 +21,7 @@ interface TerminalProps {
 const WELCOME_MESSAGE: TerminalOutputItem = {
   id: "welcome",
   type: "output",
-  content: `Welcome to my AI-powered chat! 🤖\n\nI can help answer questions about me, my work, and more.\nType your message to start chatting, or use commands like "help".\n`,
+  content: `Welcome to my AI-powered chat! 🤖\nI can help answer questions about me, my work, and more.\nType your message to start chatting, or use commands like "help".\n`,
   timestamp: Date.now()
 };
 
@@ -85,6 +85,11 @@ export const Terminal: React.FC<TerminalProps> = ({ onRipple }) => {
     ]);
   };
 
+  const isRegularCommand = (value: string) => {
+    const regularCommands = ["help", "about", "projects", "skills", "experience", "education", "contact", "socials", "resume", "clear", "ask"];
+    return regularCommands.some((command) => value.toLowerCase().startsWith(command));
+  };
+
   const runCommand = async (currentInput: string) => {
     if (!currentInput.trim() || isExited || isLoading) return;
 
@@ -132,10 +137,9 @@ export const Terminal: React.FC<TerminalProps> = ({ onRipple }) => {
     // Handle chat mode
     if (chatMode) {
       // Exit chat mode if user types 'exit' or a regular command
-      const regularCommands = ["help", "about", "projects", "skills", "experience", "education", "contact", "socials", "resume", "clear", "ask"];
-      const isRegularCommand = regularCommands.some(cmd => currentInput.toLowerCase().startsWith(cmd));
+      const shouldRunRegularCommand = isRegularCommand(currentInput);
       
-      if (currentInput.toLowerCase() === "exit" || isRegularCommand) {
+      if (currentInput.toLowerCase() === "exit" || shouldRunRegularCommand) {
         setChatMode(false);
         if (currentInput.toLowerCase() === "exit") {
           addOutput("Exiting chat mode...");
@@ -146,11 +150,12 @@ export const Terminal: React.FC<TerminalProps> = ({ onRipple }) => {
         // Process as chat message
         try {
           setIsLoading(true);
+          addOutput(currentInput, "output", { style: "chat-question" });
           const updatedMessages = [...chatMessages, { role: "user" as const, content: currentInput }];
           setChatMessages(updatedMessages);
 
           const response = await sendChatMessage(updatedMessages);
-          addOutput(response);
+          addOutput(response, "output", { style: "chat-answer" });
           setChatMessages([...updatedMessages, { role: "assistant", content: response }]);
         } catch (error) {
           addOutput("Error: Failed to get response from AI");
@@ -214,8 +219,17 @@ export const Terminal: React.FC<TerminalProps> = ({ onRipple }) => {
     e.preventDefault();
     const currentInput = input.trim();
     if (!currentInput || isExited || isLoading) return;
+
+    const showAsCommandLine =
+      !chatMode ||
+      currentInput.toLowerCase() === "exit" ||
+      isRegularCommand(currentInput) ||
+      !!inputMode;
+
     setInput("");
-    addCommand(currentInput);
+    if (showAsCommandLine) {
+      addCommand(currentInput);
+    }
     await runCommand(currentInput);
   };
 
@@ -245,6 +259,7 @@ export const Terminal: React.FC<TerminalProps> = ({ onRipple }) => {
             
             // Determine CSS class based on style
             let className = "";
+            let lineClassName = "terminal-line";
             if (style === "header") className = "terminal-header";
             else if (style === "title") className = "terminal-title";
             else if (style === "subtitle") className = "terminal-subtitle";
@@ -253,6 +268,13 @@ export const Terminal: React.FC<TerminalProps> = ({ onRipple }) => {
             else if (style === "date") className = "terminal-date";
             else if (style === "muted") className = "text-muted";
             else if (style === "link") className = "terminal-link";
+            else if (style === "chat-question") {
+              className = "chat-question";
+              lineClassName = "terminal-line chat-question-line";
+            } else if (style === "chat-answer") {
+              className = "chat-answer";
+              lineClassName = "terminal-line chat-answer-line";
+            }
             
             if (style === "help-row") {
               const cmdName = (item as any).data?.command;
@@ -272,7 +294,7 @@ export const Terminal: React.FC<TerminalProps> = ({ onRipple }) => {
             }
 
             return (
-              <div key={item.id} className="terminal-line">
+              <div key={item.id} className={lineClassName}>
                 {item.type === "command" && <span className="text-success">{item.content}</span>}
                 {item.type === "output" && (
                   <span className={className}>

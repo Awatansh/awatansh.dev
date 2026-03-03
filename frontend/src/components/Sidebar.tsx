@@ -42,6 +42,7 @@ const Sidebar = () => {
           <NavLink
             key={item.path}
             to={item.path}
+            title={item.label}
             className={({ isActive }) =>
               `sidebar-link ${isActive ? "sidebar-link-active" : ""}`
             }
@@ -56,6 +57,7 @@ const Sidebar = () => {
             href={resumeLink}
             target="_blank"
             rel="noopener noreferrer"
+            title="Resume"
             className="sidebar-link sidebar-link-external"
           >
             <span className="sidebar-icon">📄</span>
@@ -66,7 +68,7 @@ const Sidebar = () => {
       </div>
 
       <div className="sidebar-footer">
-        <p className="sidebar-hint">� Connect with me:</p>
+        <p className="sidebar-hint">🔗 Connect with me:</p>
         <div className="sidebar-social-links">
           {context?.socials.map((social, index) => {
             // Map social names to logo filenames

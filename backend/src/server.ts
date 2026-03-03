@@ -20,7 +20,7 @@ const frontendURL = (process.env.FRONTEND_URL || "http://localhost:5173").replac
 console.log("Environment check:");
 console.log("- PORT:", PORT);
 console.log("- FRONTEND_URL:", frontendURL);
-console.log("- GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "Set (starts with " + process.env.GEMINI_API_KEY.substring(0, 4) + "...)" : "Not Set");
+console.log("- GROQ_API_KEY:", process.env.GROQ_API_KEY ? "Set (starts with " + process.env.GROQ_API_KEY.substring(0, 4) + "...)" : "Not Set");
 
 // Middleware
 app.use(

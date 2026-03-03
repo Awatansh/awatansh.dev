@@ -15,16 +15,11 @@ export function useRippleBackground() {
             ripple.style.top = `${y}px`;
             containerRef.current.appendChild(ripple);
             // Remove after animation
-            setTimeout(() => ripple.remove(), 1500);
+            setTimeout(() => ripple.remove(), 1800);
         };
-        const container = containerRef.current;
-        if (container) {
-            container.addEventListener("click", handleClick);
-        }
+        document.addEventListener("click", handleClick);
         return () => {
-            if (container) {
-                container.removeEventListener("click", handleClick);
-            }
+            document.removeEventListener("click", handleClick);
         };
     }, []);
     return containerRef;

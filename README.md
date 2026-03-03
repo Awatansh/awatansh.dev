@@ -1,11 +1,11 @@
 # Terminal-Based Portfolio
 
-A minimalist, terminal-styled portfolio with Gemini AI integration, built with React and Express.
+A minimalist, terminal-styled portfolio with Groq LLM integration, built with React and Express.
 
 ## ✨ Features
 
 - 🖥️ **Fullscreen Terminal** - Green-on-black retro interface
-- 🤖 **Gemini AI** - Context-aware ask & chat modes
+- 🤖 **Groq LLM** - Context-aware ask & chat modes
 - 🎮 **13 Commands** - Full-featured terminal experience
 - 🌊 **Ripple Animations** - Interactive mouse effects
 - 📱 **Responsive Design** - Works on all devices
@@ -61,7 +61,7 @@ For detailed setup, see [DEV.md](DEV.md)
 | Frontend | React 18 + TypeScript + Tailwind CSS |
 | Backend  | Express.js + Node.js                 |
 | Database | MongoDB (with auto-cleanup)          |
-| AI       | Google Gemini API                    |
+| AI       | Groq Chat Completions API            |
 | Build    | Vite                                 |
 | Testing  | Vitest + Jest                        |
 
@@ -81,7 +81,7 @@ portfolio/
 - Node.js 18+
 - npm 9+
 - MongoDB (local or Atlas)
-- Gemini API key (free from aistudio.google.com)
+- Groq API key (from console.groq.com)
 
 ## 🎯 Key Features
 
@@ -111,7 +111,9 @@ portfolio/
 
 ```env
 DATABASE_URL=mongodb://localhost:27017/portfolio
-GEMINI_API_KEY=your_key_here
+GROQ_API_KEY=your_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_BASE_URL=https://api.groq.com/openai/v1
 PORT=5000
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173

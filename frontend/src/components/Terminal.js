@@ -7,7 +7,7 @@ import { TERMINAL_PROMPT } from "@portfolio/shared";
 const WELCOME_MESSAGE = {
     id: "welcome",
     type: "output",
-    content: `Welcome to my AI-powered chat! 🤖\n\nI can help answer questions about me, my work, and more.\nType your message to start chatting, or use commands like "help".\n`,
+    content: `Welcome to my AI-powered chat! 🤖\nI can help answer questions about me, my work, and more.\nType your message to start chatting, or use commands like "help".\n`,
     timestamp: Date.now()
 };
 export const Terminal = ({ onRipple }) => {
@@ -66,6 +66,10 @@ export const Terminal = ({ onRipple }) => {
             }
         ]);
     };
+    const isRegularCommand = (value) => {
+        const regularCommands = ["help", "about", "projects", "skills", "experience", "education", "contact", "socials", "resume", "clear", "ask"];
+        return regularCommands.some((command) => value.toLowerCase().startsWith(command));
+    };
     const runCommand = async (currentInput) => {
         if (!currentInput.trim() || isExited || isLoading)
             return;
@@ -112,9 +116,8 @@ export const Terminal = ({ onRipple }) => {
         // Handle chat mode
         if (chatMode) {
             // Exit chat mode if user types 'exit' or a regular command
-            const regularCommands = ["help", "about", "projects", "skills", "experience", "education", "contact", "socials", "resume", "clear", "ask"];
-            const isRegularCommand = regularCommands.some(cmd => currentInput.toLowerCase().startsWith(cmd));
-            if (currentInput.toLowerCase() === "exit" || isRegularCommand) {
+            const shouldRunRegularCommand = isRegularCommand(currentInput);
+            if (currentInput.toLowerCase() === "exit" || shouldRunRegularCommand) {
                 setChatMode(false);
                 if (currentInput.toLowerCase() === "exit") {
                     addOutput("Exiting chat mode...");
@@ -126,10 +129,11 @@ export const Terminal = ({ onRipple }) => {
                 // Process as chat message
                 try {
                     setIsLoading(true);
+                    addOutput(currentInput, "output", { style: "chat-question" });
                     const updatedMessages = [...chatMessages, { role: "user", content: currentInput }];
                     setChatMessages(updatedMessages);
                     const response = await sendChatMessage(updatedMessages);
-                    addOutput(response);
+                    addOutput(response, "output", { style: "chat-answer" });
                     setChatMessages([...updatedMessages, { role: "assistant", content: response }]);
                 }
                 catch (error) {
@@ -197,8 +201,14 @@ export const Terminal = ({ onRipple }) => {
         const currentInput = input.trim();
         if (!currentInput || isExited || isLoading)
             return;
+        const showAsCommandLine = !chatMode ||
+            currentInput.toLowerCase() === "exit" ||
+            isRegularCommand(currentInput) ||
+            !!inputMode;
         setInput("");
-        addCommand(currentInput);
+        if (showAsCommandLine) {
+            addCommand(currentInput);
+        }
         await runCommand(currentInput);
     };
     const handleClickableCommand = (command) => {
@@ -218,6 +228,7 @@ export const Terminal = ({ onRipple }) => {
                         const clickCommand = item.data?.clickCommand;
                         // Determine CSS class based on style
                         let className = "";
+                        let lineClassName = "terminal-line";
                         if (style === "header")
                             className = "terminal-header";
                         else if (style === "title")
@@ -234,12 +245,20 @@ export const Terminal = ({ onRipple }) => {
                             className = "text-muted";
                         else if (style === "link")
                             className = "terminal-link";
+                        else if (style === "chat-question") {
+                            className = "chat-question";
+                            lineClassName = "terminal-line chat-question-line";
+                        }
+                        else if (style === "chat-answer") {
+                            className = "chat-answer";
+                            lineClassName = "terminal-line chat-answer-line";
+                        }
                         if (style === "help-row") {
                             const cmdName = item.data?.command;
                             const cmdDesc = item.data?.description;
                             return (_jsxs("div", { className: "terminal-line help-row", children: [_jsxs("button", { onClick: () => handleClickableCommand(cmdName), className: "terminal-link-button", style: { background: "none", border: "none", padding: "2px 4px", cursor: "pointer", marginRight: "12px", minWidth: "100px", textAlign: "left" }, children: ["\u2022 ", cmdName] }), _jsx("span", { className: "terminal-description", children: cmdDesc })] }, item.id));
                         }
-                        return (_jsxs("div", { className: "terminal-line", children: [item.type === "command" && _jsx("span", { className: "text-success", children: item.content }), item.type === "output" && (_jsx("span", { className: className, children: link ? (_jsx("a", { href: link, target: "_blank", rel: "noopener noreferrer", className: "terminal-link", onClick: (e) => e.stopPropagation(), children: item.content })) : clickCommand ? (_jsx("button", { onClick: () => handleClickableCommand(clickCommand), className: "terminal-link-button", style: { background: "none", border: "none", padding: 0, cursor: "pointer" }, children: item.content })) : (item.content) }))] }, item.id));
+                        return (_jsxs("div", { className: lineClassName, children: [item.type === "command" && _jsx("span", { className: "text-success", children: item.content }), item.type === "output" && (_jsx("span", { className: className, children: link ? (_jsx("a", { href: link, target: "_blank", rel: "noopener noreferrer", className: "terminal-link", onClick: (e) => e.stopPropagation(), children: item.content })) : clickCommand ? (_jsx("button", { onClick: () => handleClickableCommand(clickCommand), className: "terminal-link-button", style: { background: "none", border: "none", padding: 0, cursor: "pointer" }, children: item.content })) : (item.content) }))] }, item.id));
                     }) }), _jsxs("div", { className: "terminal-input-line", children: [_jsxs("span", { className: "terminal-prompt", children: [TERMINAL_PROMPT, `>`] }), _jsx("form", { onSubmit: handleSubmit, className: "terminal-form", children: _jsx("input", { ref: inputRef, type: "text", className: "terminal-input", value: input, onChange: (e) => setInput(e.target.value), disabled: isExited || isLoading, placeholder: isExited ? "Session ended" : "Type a command...", autoFocus: true }) }), !isExited && _jsx("span", { className: "cursor" })] })] }) }));
 };
 export default Terminal;

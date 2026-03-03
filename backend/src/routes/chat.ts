@@ -1,5 +1,5 @@
 import express from "express";
-import { chat, askQuestion, generateSummary } from "../services/gemini.js";
+import { chat, askQuestion, generateSummary } from "../services/llm.js";
 import { getDatabase } from "../database.js";
 import type { PortfolioContext } from "@portfolio/shared";
 
