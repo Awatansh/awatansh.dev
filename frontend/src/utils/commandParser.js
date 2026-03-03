@@ -90,10 +90,31 @@ export async function executeCommand(input, context) {
         if (context.skills.length === 0) {
             return [{ type: "text", content: "\nNo skills added yet.\n" }];
         }
+        const grouped = new Map();
+        context.skills.forEach((skill) => {
+            const rawCategory = (skill?.category || "").trim();
+            const category = rawCategory || "Other";
+            const categoryKey = category.toLowerCase();
+            if (!grouped.has(categoryKey)) {
+                grouped.set(categoryKey, { category, items: [] });
+            }
+            const bucket = grouped.get(categoryKey);
+            if (!bucket)
+                return;
+            (skill?.items || []).forEach((item) => {
+                const cleaned = (item || "").trim();
+                if (!cleaned)
+                    return;
+                const exists = bucket.items.some((existingItem) => existingItem.toLowerCase() === cleaned.toLowerCase());
+                if (!exists) {
+                    bucket.items.push(cleaned);
+                }
+            });
+        });
         const outputs = [];
         outputs.push({ type: "text", content: "\n🛠️  Technical Skills\n", data: { style: "header" } });
         outputs.push({ type: "text", content: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n", data: { style: "muted" } });
-        context.skills.forEach((s) => {
+        Array.from(grouped.values()).forEach((s) => {
             outputs.push({ type: "text", content: `\n▸ ${s.category}\n`, data: { style: "subtitle" } });
             const skillBadges = s.items.map((item) => `[${item}]`).join(" ");
             outputs.push({ type: "text", content: `  ${skillBadges}\n`, data: { style: "tech" } });

@@ -182,6 +182,22 @@ const AdminDashboard = () => {
     setContext({ ...context, skills: updated });
   };
 
+  const addSkill = () => {
+    if (!context) return;
+    setContext({
+      ...context,
+      skills: [...context.skills, { category: "New Category", items: [] }],
+    });
+  };
+
+  const deleteSkill = (index: number) => {
+    if (!context) return;
+    setContext({
+      ...context,
+      skills: context.skills.filter((_, i) => i !== index),
+    });
+  };
+
   // Socials management
   const addSocial = () => {
     if (!context) return;
@@ -726,14 +742,21 @@ const AdminDashboard = () => {
                 <h1>⚡ Skills</h1>
                 <p className="section-subtitle">Manage your technical skills</p>
               </div>
-              <button onClick={handleSave} className="save-btn" disabled={saving}>
-                {saving ? "Saving..." : "💾 Save Changes"}
-              </button>
+              <div className="header-actions">
+                <button onClick={addSkill} className="add-btn-secondary">+ Add Skill</button>
+                <button onClick={handleSave} className="save-btn" disabled={saving}>
+                  {saving ? "Saving..." : "💾 Save Changes"}
+                </button>
+              </div>
             </div>
 
             <div className="section-content">
               {context.skills.map((skill, index) => (
                 <div key={index} className="edit-card">
+                  <div className="card-header">
+                    <h3>{skill.category || "Skill Category"}</h3>
+                    <button onClick={() => deleteSkill(index)} className="delete-small-btn">🗑️</button>
+                  </div>
                   <div className="form-group">
                     <label>Category</label>
                     <input 
