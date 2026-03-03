@@ -45,8 +45,21 @@ const VIDEO_ID = extractVideoId(YT_MUSIC_LINK);
 const BackgroundAudioPlayer = () => {
   const playerRef = useRef<any>(null);
   const mountRef = useRef<HTMLDivElement>(null);
-  const [muted, setMuted] = useState(true);
-  const [volume, setVolume] = useState(35);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [volume, setVolume] = useState(50);
+
+  const tryStartPlaying = () => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    player.setVolume(volume);
+    player.unMute();
+    player.playVideo();
+    window.setTimeout(() => {
+      const state = player.getPlayerState?.();
+      setIsPlaying(state === 1 || state === 3);
+    }, 120);
+  };
 
   useEffect(() => {
     const win = window as any;
@@ -76,10 +89,18 @@ const BackgroundAudioPlayer = () => {
         events: {
           onReady: (event: any) => {
             event.target.seekTo(0, true);
-            event.target.setVolume(35);
-            event.target.mute();
-            event.target.playVideo();
-            setMuted(true);
+            tryStartPlaying();
+          },
+          onStateChange: (event: any) => {
+            const state = event?.data;
+            if (state === 1 || state === 3) {
+              setIsPlaying(true);
+              return;
+            }
+
+            if (state === 2 || state === 0 || state === 5) {
+              setIsPlaying(false);
+            }
           },
         },
       });
@@ -120,19 +141,20 @@ const BackgroundAudioPlayer = () => {
     };
   }, []);
 
-  const toggleMute = () => {
+  const togglePlayPause = () => {
     const player = playerRef.current;
     if (!player) return;
 
-    if (muted) {
+    if (!isPlaying) {
       player.unMute();
+      player.setVolume(volume);
       player.playVideo();
-      setMuted(false);
+      setIsPlaying(true);
       return;
     }
 
-    player.mute();
-    setMuted(true);
+    player.pauseVideo();
+    setIsPlaying(false);
   };
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,12 +169,10 @@ const BackgroundAudioPlayer = () => {
 
     if (nextVolume <= 0) {
       player.mute();
-      setMuted(true);
       return;
     }
 
     player.unMute();
-    setMuted(false);
   };
 
   return (
@@ -175,11 +195,11 @@ const BackgroundAudioPlayer = () => {
         <button
           type="button"
           className="bg-audio-toggle"
-          aria-label={muted ? "Unmute background music" : "Mute background music"}
-          title={muted ? "Unmute" : "Mute"}
-          onClick={toggleMute}
+          aria-label={isPlaying ? "Pause background music" : "Play background music"}
+          title={isPlaying ? "Pause" : "Play"}
+          onClick={togglePlayPause}
         >
-          {muted ? "🔇" : "🔊"}
+          {isPlaying ? "🔊" : "🔇"}
         </button>
       </div>
     </>

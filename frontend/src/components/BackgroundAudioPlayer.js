@@ -38,8 +38,20 @@ const VIDEO_ID = extractVideoId(YT_MUSIC_LINK);
 const BackgroundAudioPlayer = () => {
     const playerRef = useRef(null);
     const mountRef = useRef(null);
-    const [muted, setMuted] = useState(true);
-    const [volume, setVolume] = useState(35);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [volume, setVolume] = useState(50);
+    const tryStartPlaying = () => {
+        const player = playerRef.current;
+        if (!player)
+            return;
+        player.setVolume(volume);
+        player.unMute();
+        player.playVideo();
+        window.setTimeout(() => {
+            const state = player.getPlayerState?.();
+            setIsPlaying(state === 1 || state === 3);
+        }, 120);
+    };
     useEffect(() => {
         const win = window;
         const initializePlayer = () => {
@@ -66,10 +78,17 @@ const BackgroundAudioPlayer = () => {
                 events: {
                     onReady: (event) => {
                         event.target.seekTo(0, true);
-                        event.target.setVolume(35);
-                        event.target.mute();
-                        event.target.playVideo();
-                        setMuted(true);
+                        tryStartPlaying();
+                    },
+                    onStateChange: (event) => {
+                        const state = event?.data;
+                        if (state === 1 || state === 3) {
+                            setIsPlaying(true);
+                            return;
+                        }
+                        if (state === 2 || state === 0 || state === 5) {
+                            setIsPlaying(false);
+                        }
                     },
                 },
             });
@@ -101,18 +120,19 @@ const BackgroundAudioPlayer = () => {
             playerRef.current = null;
         };
     }, []);
-    const toggleMute = () => {
+    const togglePlayPause = () => {
         const player = playerRef.current;
         if (!player)
             return;
-        if (muted) {
+        if (!isPlaying) {
             player.unMute();
+            player.setVolume(volume);
             player.playVideo();
-            setMuted(false);
+            setIsPlaying(true);
             return;
         }
-        player.mute();
-        setMuted(true);
+        player.pauseVideo();
+        setIsPlaying(false);
     };
     const handleVolumeChange = (event) => {
         const player = playerRef.current;
@@ -124,12 +144,10 @@ const BackgroundAudioPlayer = () => {
         player.playVideo();
         if (nextVolume <= 0) {
             player.mute();
-            setMuted(true);
             return;
         }
         player.unMute();
-        setMuted(false);
     };
-    return (_jsxs(_Fragment, { children: [_jsx("div", { className: "bg-audio-player-host", ref: mountRef, "aria-hidden": "true" }), _jsxs("div", { className: "bg-audio-control", children: [_jsx("div", { className: "bg-audio-volume-wrap", children: _jsx("input", { className: "bg-audio-volume", type: "range", min: 0, max: 100, step: 1, value: volume, "aria-label": "Background music volume", title: "Volume", onChange: handleVolumeChange }) }), _jsx("button", { type: "button", className: "bg-audio-toggle", "aria-label": muted ? "Unmute background music" : "Mute background music", title: muted ? "Unmute" : "Mute", onClick: toggleMute, children: muted ? "🔇" : "🔊" })] })] }));
+    return (_jsxs(_Fragment, { children: [_jsx("div", { className: "bg-audio-player-host", ref: mountRef, "aria-hidden": "true" }), _jsxs("div", { className: "bg-audio-control", children: [_jsx("div", { className: "bg-audio-volume-wrap", children: _jsx("input", { className: "bg-audio-volume", type: "range", min: 0, max: 100, step: 1, value: volume, "aria-label": "Background music volume", title: "Volume", onChange: handleVolumeChange }) }), _jsx("button", { type: "button", className: "bg-audio-toggle", "aria-label": isPlaying ? "Pause background music" : "Play background music", title: isPlaying ? "Pause" : "Play", onClick: togglePlayPause, children: isPlaying ? "🔊" : "🔇" })] })] }));
 };
 export default BackgroundAudioPlayer;
