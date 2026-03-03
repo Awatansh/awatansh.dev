@@ -82,18 +82,18 @@ const AboutPage = () => {
           <div className="about-highlights">
             <div className="highlight-card">
               <div className="highlight-icon">🚀</div>
-              <h3>Full-Stack Development</h3>
-              <p>Building scalable applications with modern frameworks</p>
+              <h3>Scalable Systems & Backend Engineering</h3>
+              <p>Designing production-ready applications with clean architecture, secure APIs, and optimized databases.</p>
             </div>
             <div className="highlight-card">
               <div className="highlight-icon">🤖</div>
-              <h3>AI & Machine Learning</h3>
-              <p>Exploring cutting-edge AI technologies and research</p>
+              <h3>Applied Machine Learning & LLM Systems</h3>
+              <p>Building end-to-end ML pipelines, NLP systems, and LLM-powered applications with real-time inference and model optimization.</p>
             </div>
             <div className="highlight-card">
-              <div className="highlight-icon">🌟</div>
-              <h3>Open Source</h3>
-              <p>Contributing to the community and sharing knowledge</p>
+              <div className="highlight-icon">⚡</div>
+              <h3>Performance & Problem Solving</h3>
+              <p>Optimizing systems for efficiency and sharpening algorithmic thinking through competitive programming.</p>
             </div>
           </div>
         </div>
@@ -101,11 +101,11 @@ const AboutPage = () => {
         <div className="content-section">
           <h2 className="section-title">🎯 What I Do</h2>
           <ul className="feature-list">
-            <li>Design and develop full-stack web applications</li>
-            <li>Research and implement AI/ML solutions</li>
-            <li>Collaborate on open-source projects</li>
-            <li>Write technical content and documentation</li>
-            <li>Mentor aspiring developers</li>
+            <li>Build end-to-end AI-powered applications (from data preprocessing to deployment)</li>
+            <li>Design scalable full-stack systems using modern web technologies</li>
+            <li>Develop and tune ML models for real-world performance</li>
+            <li>Work with APIs, cloud tools, and containerized deployments</li>
+            <li>Continuously improve through competitive programming and hands-on experimentation</li>
           </ul>
         </div>
 
