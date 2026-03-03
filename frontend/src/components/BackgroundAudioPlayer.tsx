@@ -45,49 +45,8 @@ const VIDEO_ID = extractVideoId(YT_MUSIC_LINK);
 const BackgroundAudioPlayer = () => {
   const playerRef = useRef<any>(null);
   const mountRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(50);
-
-  const enableIframeAutoplayPermission = () => {
-    const player = playerRef.current;
-    if (!player || typeof player.getIframe !== "function") return;
-    const iframe = player.getIframe() as HTMLIFrameElement | undefined;
-    if (!iframe) return;
-    iframe.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
-  };
-
-  const tryStartPlaying = () => {
-    const player = playerRef.current;
-    if (!player) return;
-
-    enableIframeAutoplayPermission();
-    player.setVolume(volume);
-    player.unMute();
-    player.playVideo();
-    window.setTimeout(() => {
-      const state = player.getPlayerState?.();
-      setIsPlaying(state === 1 || state === 3);
-    }, 120);
-  };
-
-  const tryStartPlayingWithRetries = () => {
-    tryStartPlaying();
-
-    [300, 1100, 2200].forEach((delay) => {
-      window.setTimeout(() => {
-        const player = playerRef.current;
-        if (!player) return;
-
-        const state = player.getPlayerState?.();
-        if (state === 1 || state === 3) {
-          setIsPlaying(true);
-          return;
-        }
-
-        tryStartPlaying();
-      }, delay);
-    });
-  };
 
   useEffect(() => {
     const win = window as any;
@@ -102,7 +61,7 @@ const BackgroundAudioPlayer = () => {
         height: "1",
         videoId: VIDEO_ID,
         playerVars: {
-          autoplay: 1,
+          autoplay: 0,
           controls: 0,
           disablekb: 1,
           fs: 0,
@@ -117,7 +76,10 @@ const BackgroundAudioPlayer = () => {
         events: {
           onReady: (event: any) => {
             event.target.seekTo(0, true);
-            tryStartPlayingWithRetries();
+            event.target.setVolume(volume);
+            event.target.mute();
+            event.target.stopVideo();
+            setIsPlaying(false);
           },
           onStateChange: (event: any) => {
             const state = event?.data;
@@ -193,14 +155,15 @@ const BackgroundAudioPlayer = () => {
     if (!player) return;
 
     player.setVolume(nextVolume);
-    player.playVideo();
 
     if (nextVolume <= 0) {
       player.mute();
       return;
     }
 
-    player.unMute();
+    if (isPlaying) {
+      player.unMute();
+    }
   };
 
   return (

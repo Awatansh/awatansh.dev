@@ -38,46 +38,8 @@ const VIDEO_ID = extractVideoId(YT_MUSIC_LINK);
 const BackgroundAudioPlayer = () => {
     const playerRef = useRef(null);
     const mountRef = useRef(null);
-    const [isPlaying, setIsPlaying] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(50);
-    const enableIframeAutoplayPermission = () => {
-        const player = playerRef.current;
-        if (!player || typeof player.getIframe !== "function")
-            return;
-        const iframe = player.getIframe();
-        if (!iframe)
-            return;
-        iframe.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
-    };
-    const tryStartPlaying = () => {
-        const player = playerRef.current;
-        if (!player)
-            return;
-        enableIframeAutoplayPermission();
-        player.setVolume(volume);
-        player.unMute();
-        player.playVideo();
-        window.setTimeout(() => {
-            const state = player.getPlayerState?.();
-            setIsPlaying(state === 1 || state === 3);
-        }, 120);
-    };
-    const tryStartPlayingWithRetries = () => {
-        tryStartPlaying();
-        [300, 1100, 2200].forEach((delay) => {
-            window.setTimeout(() => {
-                const player = playerRef.current;
-                if (!player)
-                    return;
-                const state = player.getPlayerState?.();
-                if (state === 1 || state === 3) {
-                    setIsPlaying(true);
-                    return;
-                }
-                tryStartPlaying();
-            }, delay);
-        });
-    };
     useEffect(() => {
         const win = window;
         const initializePlayer = () => {
@@ -89,7 +51,7 @@ const BackgroundAudioPlayer = () => {
                 height: "1",
                 videoId: VIDEO_ID,
                 playerVars: {
-                    autoplay: 1,
+                    autoplay: 0,
                     controls: 0,
                     disablekb: 1,
                     fs: 0,
@@ -104,7 +66,10 @@ const BackgroundAudioPlayer = () => {
                 events: {
                     onReady: (event) => {
                         event.target.seekTo(0, true);
-                        tryStartPlayingWithRetries();
+                        event.target.setVolume(volume);
+                        event.target.mute();
+                        event.target.stopVideo();
+                        setIsPlaying(false);
                     },
                     onStateChange: (event) => {
                         const state = event?.data;
@@ -167,12 +132,13 @@ const BackgroundAudioPlayer = () => {
         if (!player)
             return;
         player.setVolume(nextVolume);
-        player.playVideo();
         if (nextVolume <= 0) {
             player.mute();
             return;
         }
-        player.unMute();
+        if (isPlaying) {
+            player.unMute();
+        }
     };
     return (_jsxs(_Fragment, { children: [_jsx("div", { className: "bg-audio-player-host", ref: mountRef, "aria-hidden": "true" }), _jsxs("div", { className: "bg-audio-control", children: [_jsx("div", { className: "bg-audio-volume-wrap", children: _jsx("input", { className: "bg-audio-volume", type: "range", min: 0, max: 100, step: 1, value: volume, "aria-label": "Background music volume", title: "Volume", onChange: handleVolumeChange }) }), _jsx("button", { type: "button", className: "bg-audio-toggle", "aria-label": isPlaying ? "Pause background music" : "Play background music", title: isPlaying ? "Pause" : "Play", onClick: togglePlayPause, children: isPlaying ? "🔊" : "🔇" })] })] }));
 };
