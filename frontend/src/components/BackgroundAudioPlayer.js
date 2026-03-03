@@ -40,10 +40,20 @@ const BackgroundAudioPlayer = () => {
     const mountRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(true);
     const [volume, setVolume] = useState(50);
+    const enableIframeAutoplayPermission = () => {
+        const player = playerRef.current;
+        if (!player || typeof player.getIframe !== "function")
+            return;
+        const iframe = player.getIframe();
+        if (!iframe)
+            return;
+        iframe.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
+    };
     const tryStartPlaying = () => {
         const player = playerRef.current;
         if (!player)
             return;
+        enableIframeAutoplayPermission();
         player.setVolume(volume);
         player.unMute();
         player.playVideo();
@@ -51,6 +61,22 @@ const BackgroundAudioPlayer = () => {
             const state = player.getPlayerState?.();
             setIsPlaying(state === 1 || state === 3);
         }, 120);
+    };
+    const tryStartPlayingWithRetries = () => {
+        tryStartPlaying();
+        [300, 1100, 2200].forEach((delay) => {
+            window.setTimeout(() => {
+                const player = playerRef.current;
+                if (!player)
+                    return;
+                const state = player.getPlayerState?.();
+                if (state === 1 || state === 3) {
+                    setIsPlaying(true);
+                    return;
+                }
+                tryStartPlaying();
+            }, delay);
+        });
     };
     useEffect(() => {
         const win = window;
@@ -78,7 +104,7 @@ const BackgroundAudioPlayer = () => {
                 events: {
                     onReady: (event) => {
                         event.target.seekTo(0, true);
-                        tryStartPlaying();
+                        tryStartPlayingWithRetries();
                     },
                     onStateChange: (event) => {
                         const state = event?.data;
